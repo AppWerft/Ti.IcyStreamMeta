@@ -7,7 +7,7 @@ Usage
 -----
 ```javascript
 var metaModule = require("de.appwerft.icystreammeta");
-var metaClient = metaModule.createIcyMeta({
+var metaClient = metaModule.createIcyClient({
     url : "http://hr-mp3-m-h2.akacast.akamaistream.net/7/786/142132/v1/gnl.akacast.akamaistream.net/hr-mp3-m-h2",
     onload : function(_e) {
         console.log(_e);
