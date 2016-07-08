@@ -25,7 +25,7 @@ import java.util.regex.PatternSyntaxException;
 
 // This proxy can be created by calling Icystreammeta.createExample({message: "hello world"})
 @Kroll.proxy(creatableInModule = IcyMetaModule.class)
-public class IcyMetaProxy extends KrollProxy {
+public class IcyClientProxy extends KrollProxy {
 	// Standard Debugging variables
 	private static final String LCAT = "ICYMETA=============";
 	private URL url = null;
@@ -34,7 +34,7 @@ public class IcyMetaProxy extends KrollProxy {
 	KrollFunction errorCallback = null;
 
 	// Constructor
-	public IcyMetaProxy() {
+	public IcyClientProxy() {
 		super();
 		metaClient = new IcyStreamMeta();
 	}
