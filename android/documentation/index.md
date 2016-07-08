@@ -1,39 +1,26 @@
-# icystreammeta Module
+Ti.IcyStreamMeta
+================
 
-## Description
+This is a Titanium module fort getting the radiotext.
 
-TODO: Enter your module description here
+Usage
+-----
+```javascript
+var metaModule = require("de.appwerft.icystreammeta");
+var metaClient = metaModule.createIcyMeta({
+    url : "http://hr-mp3-m-h2.akacast.akamaistream.net/7/786/142132/v1/gnl.akacast.akamaistream.net/hr-mp3-m-h2",
+    onload : function(_e) {
+        console.log(_e);
+    },
+    onerror : function(_e) {
+        console.log(_e);
+    }
+});
+setInterval(function() {
+    metaClient.refreshMeta();
+}, 20000);
+```
 
-## Accessing the icystreammeta Module
 
-To access this module from JavaScript, you would do the following:
+###Methods
 
-    var icystreammeta = require("de.appwerft.icystreammeta");
-
-The icystreammeta variable is a reference to the Module object.
-
-## Reference
-
-TODO: If your module has an API, you should document
-the reference here.
-
-### icystreammeta.function
-
-TODO: This is an example of a module function.
-
-### icystreammeta.property
-
-TODO: This is an example of a module property.
-
-## Usage
-
-TODO: Enter your usage example here
-
-## Author
-
-TODO: Enter your author name, email and other contact
-details you want to share here.
-
-## License
-
-TODO: Enter your license/legal information here.

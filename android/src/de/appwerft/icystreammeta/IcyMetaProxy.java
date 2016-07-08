@@ -66,7 +66,14 @@ public class IcyMetaProxy extends KrollProxy {
 				e.printStackTrace();
 			}
 		}
-		Log.d(LCAT, options.toString());
+		if (options.containsKey(TiC.PROPERTY_ONERROR)) {
+			Object cb = options.get(TiC.PROPERTY_ONERROR);
+			if (cb instanceof KrollFunction) {
+				errorCallback = (KrollFunction) cb;
+			} else {
+				Log.e(LCAT, "onerroris not KrollFunction");
+			}
+		}
 	}
 
 	// Methods
@@ -227,13 +234,11 @@ public class IcyMetaProxy extends KrollProxy {
 					}
 				}
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			try {
 				stream.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			KrollDict resultDict = new KrollDict();
@@ -261,7 +266,6 @@ public class IcyMetaProxy extends KrollProxy {
 		}
 
 		public boolean isError() {
-
 			return isError;
 		}
 
