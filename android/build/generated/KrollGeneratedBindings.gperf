@@ -1,0 +1,18 @@
+%define lookup-function-name lookupGeneratedInit
+%define class-name IcystreammetaBindings
+%{
+
+#include <string.h>
+#include <v8.h>
+#include <KrollBindings.h>
+
+#include "de.appwerft.icystreammeta.IcyMetaProxy.h"
+#include "de.appwerft.icystreammeta.IcyMetaModule.h"
+
+
+%}
+struct titanium::bindings::BindEntry;
+%%
+de.appwerft.icystreammeta.IcyMetaProxy, ::de::appwerft::icystreammeta::icystreammeta::IcyMetaProxy::bindProxy, ::de::appwerft::icystreammeta::icystreammeta::IcyMetaProxy::dispose
+de.appwerft.icystreammeta.IcyMetaModule, ::de::appwerft::icystreammeta::IcyMetaModule::bindProxy, ::de::appwerft::icystreammeta::IcyMetaModule::dispose
+%%
