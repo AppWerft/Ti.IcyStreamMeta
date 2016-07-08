@@ -76,7 +76,6 @@ public class IcyMetaProxy extends KrollProxy {
 		}
 	}
 
-	// Methods
 	@Kroll.method
 	public String getStreamURL() {
 		return this.url.toString();
