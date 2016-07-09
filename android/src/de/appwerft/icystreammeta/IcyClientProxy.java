@@ -14,6 +14,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.regex.PatternSyntaxException;
 
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollFunction;
@@ -21,7 +24,8 @@ import org.appcelerator.kroll.KrollProxy;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiC;
-import java.util.regex.PatternSyntaxException;
+
+import android.os.AsyncTask;
 
 // This proxy can be created by calling Icystreammeta.createExample({message: "hello world"})
 @Kroll.proxy(creatableInModule = IcyMetaModule.class)
@@ -29,6 +33,9 @@ public class IcyClientProxy extends KrollProxy {
 	// Standard Debugging variables
 	private static final String LCAT = "ICYMETA=============";
 	private URL url = null;
+	private int interval = 10; // sec
+	private boolean autoStart = true;
+
 	IcyStreamMeta metaClient = null;
 	KrollFunction loadCallback = null;
 	KrollFunction errorCallback = null;
@@ -53,6 +60,12 @@ public class IcyClientProxy extends KrollProxy {
 				e.printStackTrace();
 			}
 		}
+		if (options.containsKey("interval")) {
+			interval = options.getInt("interval");
+		}
+		if (options.containsKey("autoStart")) {
+			autoStart = options.getBoolean("autoStart");
+		}
 		if (options.containsKey(TiC.PROPERTY_ONLOAD)) {
 			Object cb = options.get(TiC.PROPERTY_ONLOAD);
 			if (cb instanceof KrollFunction) {
@@ -60,10 +73,12 @@ public class IcyClientProxy extends KrollProxy {
 			} else {
 				Log.e(LCAT, "onload is not KrollFunction");
 			}
-			try {
-				metaClient.refreshMeta();
-			} catch (IOException e) {
-				e.printStackTrace();
+			if (autoStart == true) {
+				try {
+					metaClient.refreshMeta();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		if (options.containsKey(TiC.PROPERTY_ONERROR)) {
@@ -79,6 +94,16 @@ public class IcyClientProxy extends KrollProxy {
 	@Kroll.method
 	public String getStreamURL() {
 		return this.url.toString();
+	}
+
+	@Kroll.method
+	public void start() {
+		metaClient.startTimer();
+	}
+
+	@Kroll.method
+	public void stop() {
+		metaClient.stopTimer();
 	}
 
 	@Kroll.method
@@ -115,10 +140,28 @@ public class IcyClientProxy extends KrollProxy {
 		private URL streamUrl;
 		private Map<String, String> metadata;
 		private boolean isError;
+		private boolean isRunning;
+		private Timer timer;
 
 		public IcyStreamMeta() {
 			// setStreamUrl(streamUrl);
 			isError = false;
+			timer = new Timer();
+		}
+
+		public void startTimer() {
+			timer.scheduleAtFixedRate(new TimerTask() {
+				@Override
+				public void run() {
+					retreiveMetadata();
+				}
+			}, 0, interval);
+			isRunning = true;
+		}
+
+		public void stopTimer() {
+			timer.cancel();
+			isRunning = false;
 		}
 
 		@SuppressWarnings("unused")
@@ -171,99 +214,6 @@ public class IcyClientProxy extends KrollProxy {
 			return metadata;
 		}
 
-		private void retreiveMetadata() {
-			URLConnection con = null;
-			try {
-				con = streamUrl.openConnection();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				sendError(e.getMessage());
-			}
-			con.setRequestProperty("Icy-MetaData", "1");
-			con.setRequestProperty("Connection", "close");
-			try {
-				con.connect();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				sendError(e.getMessage());
-			}
-			int metaDataOffset = 0;
-			Map<String, List<String>> headers = con.getHeaderFields();
-			InputStream stream = null;
-			try {
-				stream = con.getInputStream();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				sendError(e.getMessage());
-			}
-			if (headers.containsKey("icy-metaint")) {
-				// Headers are sent via HTTP
-				metaDataOffset = Integer.parseInt(headers.get("icy-metaint")
-						.get(0));
-			}
-			// In case no data was sent
-			if (metaDataOffset == 0) {
-				isError = true;
-				return;
-			}
-			int b;
-			int count = 0;
-			int metaDataLength = 4080; // 4080 is the max length
-			boolean inData = false;
-			StringBuilder metaData = new StringBuilder();
-			try {
-				while ((b = stream.read()) != -1) {
-					count++;
-					if (count == metaDataOffset + 1) {
-						metaDataLength = b * 16;
-					}
-					if (count > metaDataOffset + 1
-							&& count < (metaDataOffset + metaDataLength)) {
-						inData = true;
-					} else {
-						inData = false;
-					}
-					if (inData) {
-						if (b != 0) {
-							metaData.append((char) b);
-						}
-					}
-					if (count > (metaDataOffset + metaDataLength)) {
-						break;
-					}
-				}
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			try {
-				stream.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			KrollDict resultDict = new KrollDict();
-			String[] metaParts = metaData.toString().split(";");
-			for (int i = 0; i < metaParts.length; i++) {
-				String line = metaParts[i];
-				String[] keyval = line.split("=");
-				String key = keyval[0];
-				String val = keyval[1];
-				String sanitizedValue = "";
-				try {
-					sanitizedValue = val.substring(1, val.length() - 1)
-							.replaceAll("\r", "");
-					resultDict.put(key, sanitizedValue);
-				} catch (PatternSyntaxException ex) {
-					Log.d(LCAT, "PatternSyntaxException" + ex.getDescription());
-				} catch (IllegalArgumentException ex) {
-				} catch (IndexOutOfBoundsException ex) {
-				}
-			}
-			if (loadCallback != null)
-				loadCallback.call(getKrollObject(), resultDict);
-			else
-				Log.e(LCAT, "loadCallback is null");
-		}
-
 		public boolean isError() {
 			return isError;
 		}
@@ -283,5 +233,103 @@ public class IcyClientProxy extends KrollProxy {
 				Log.e(LCAT, "errorCallback is null");
 
 		}
-	}
-}
+
+		private void retreiveMetadata() {
+
+			AsyncTask<Void, Void, Void> doRequest = new AsyncTask<Void, Void, Void>() {
+				protected Void doInBackground(Void[] dummy) {
+					URLConnection con = null;
+					try {
+						con = streamUrl.openConnection();
+					} catch (IOException e) {
+						sendError(e.getMessage());
+					}
+					con.setRequestProperty("Icy-MetaData", "1");
+					con.setRequestProperty("Connection", "close");
+					try {
+						con.connect();
+					} catch (IOException e) {
+						sendError(e.getMessage());
+					}
+					int metaDataOffset = 0;
+					Map<String, List<String>> headers = con.getHeaderFields();
+					InputStream stream = null;
+					try {
+						stream = con.getInputStream();
+					} catch (IOException e) {
+						sendError(e.getMessage());
+					}
+					if (headers.containsKey("icy-metaint")) {
+						metaDataOffset = Integer.parseInt(headers.get(
+								"icy-metaint").get(0));
+					}
+					if (metaDataOffset == 0) {
+						isError = true;
+
+					}
+					int b;
+					int count = 0;
+					int metaDataLength = 4080; // 4080 is the max length
+					boolean inData = false;
+					StringBuilder metaData = new StringBuilder();
+					try {
+						while ((b = stream.read()) != -1) {
+							count++;
+							if (count == metaDataOffset + 1) {
+								metaDataLength = b * 16;
+							}
+							if (count > metaDataOffset + 1
+									&& count < (metaDataOffset + metaDataLength)) {
+								inData = true;
+							} else {
+								inData = false;
+							}
+							if (inData) {
+								if (b != 0) {
+									metaData.append((char) b);
+								}
+							}
+							if (count > (metaDataOffset + metaDataLength)) {
+								break;
+							}
+						}
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+					try {
+						stream.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					KrollDict resultDict = new KrollDict();
+					String[] metaParts = metaData.toString().split(";");
+					for (int i = 0; i < metaParts.length; i++) {
+						String line = metaParts[i];
+						String[] keyval = line.split("=");
+						String key = keyval[0];
+						String val = keyval[1];
+						String sanitizedValue = "";
+						try {
+							sanitizedValue = val.substring(1, val.length() - 1)
+									.replaceAll("\r", "");
+							resultDict.put(key, sanitizedValue);
+						} catch (PatternSyntaxException ex) {
+							Log.d(LCAT,
+									"PatternSyntaxException"
+											+ ex.getDescription());
+						} catch (IllegalArgumentException ex) {
+						} catch (IndexOutOfBoundsException ex) {
+						}
+					}
+					if (loadCallback != null)
+						loadCallback.call(getKrollObject(), resultDict);
+					else
+						Log.e(LCAT, "loadCallback is null");
+					return null;
+				} // do in background
+			};// async task
+			doRequest.execute();
+		} // retreiveMetadata
+	}// private class
+
+} // main class

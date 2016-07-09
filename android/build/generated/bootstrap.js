@@ -25,6 +25,7 @@ function moduleBootstrap(moduleBinding) {
 	}
 
 		addInvocationAPI(module, "Icystreammeta", "Icystreammeta", "createIcyMeta");
+	addInvocationAPI(module, "Icystreammeta", "Icystreammeta", "createIcyClient");
 
 			if (!("__propertiesDefined__" in module)) {		
 		Object.defineProperties(module, {
@@ -35,10 +36,20 @@ function moduleBootstrap(moduleBinding) {
 				},
 				configurable: true
 			},
+			"IcyClient": {
+				get: function() {
+					var IcyClient = lazyGet(this, "de.appwerft.icystreammeta.IcyClientProxy", "IcyClient", "IcyClient");
+					return IcyClient;
+				},
+				configurable: true
+			},
 		
 		});
 		module.constructor.prototype.createIcyMeta = function() {
 			return new module.IcyMeta(arguments);
+		}
+		module.constructor.prototype.createIcyClient = function() {
+			return new module.IcyClient(arguments);
 		}
 		}
 		module.__propertiesDefined__ = true;

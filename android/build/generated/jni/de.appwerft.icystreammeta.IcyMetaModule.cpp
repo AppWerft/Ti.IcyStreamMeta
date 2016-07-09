@@ -21,6 +21,7 @@
 
 
 #include "de.appwerft.icystreammeta.IcyMetaProxy.h"
+#include "de.appwerft.icystreammeta.IcyClientProxy.h"
 
 #include "org.appcelerator.kroll.KrollModule.h"
 

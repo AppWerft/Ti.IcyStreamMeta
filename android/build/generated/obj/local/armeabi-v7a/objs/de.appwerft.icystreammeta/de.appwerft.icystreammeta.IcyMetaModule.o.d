@@ -20,6 +20,7 @@
  /Library/Application\ Support/Titanium/mobilesdk/osx/5.2.0.GENPERM/android/native/include/TypeConverter.h \
  /Library/Application\ Support/Titanium/mobilesdk/osx/5.2.0.GENPERM/android/native/include/V8Util.h \
  jni/de.appwerft.icystreammeta.IcyMetaProxy.h \
+ jni/de.appwerft.icystreammeta.IcyClientProxy.h \
  /Library/Application\ Support/Titanium/mobilesdk/osx/5.2.0.GENPERM/android/native/include/org.appcelerator.kroll.KrollModule.h \
  /Library/Application\ Support/Titanium/mobilesdk/osx/5.2.0.GENPERM/android/native/include/Proxy.h
 
@@ -62,6 +63,8 @@ jni/de.appwerft.icystreammeta.IcyMetaModule.h:
 /Library/Application\ Support/Titanium/mobilesdk/osx/5.2.0.GENPERM/android/native/include/V8Util.h:
 
 jni/de.appwerft.icystreammeta.IcyMetaProxy.h:
+
+jni/de.appwerft.icystreammeta.IcyClientProxy.h:
 
 /Library/Application\ Support/Titanium/mobilesdk/osx/5.2.0.GENPERM/android/native/include/org.appcelerator.kroll.KrollModule.h:
 
