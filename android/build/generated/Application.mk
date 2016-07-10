@@ -1,4 +1,4 @@
-# Main NDK build script for de.appwerft.icystreammeta
+# Main NDK build script for de.appwerft.icymetaclient
 
 APP_BUILD_SCRIPT := jni/Android.mk
 TARGET_PLATFORM := android-10

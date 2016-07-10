@@ -1,20 +1,18 @@
 %define lookup-function-name lookupGeneratedInit
-%define class-name IcystreammetaBindings
+%define class-name IcymetaclientBindings
 %{
 
 #include <string.h>
 #include <v8.h>
 #include <KrollBindings.h>
 
-#include "de.appwerft.icystreammeta.IcyMetaProxy.h"
-#include "de.appwerft.icystreammeta.IcyMetaModule.h"
-#include "de.appwerft.icystreammeta.IcyClientProxy.h"
+#include "de.appwerft.icymetaclient.IcyMetaClientProxy.h"
+#include "de.appwerft.icymetaclient.IcymetaclientModule.h"
 
 
 %}
 struct titanium::bindings::BindEntry;
 %%
-de.appwerft.icystreammeta.IcyMetaProxy, ::de::appwerft::icystreammeta::icystreammeta::IcyMetaProxy::bindProxy, ::de::appwerft::icystreammeta::icystreammeta::IcyMetaProxy::dispose
-de.appwerft.icystreammeta.IcyMetaModule, ::de::appwerft::icystreammeta::IcyMetaModule::bindProxy, ::de::appwerft::icystreammeta::IcyMetaModule::dispose
-de.appwerft.icystreammeta.IcyClientProxy, ::de::appwerft::icystreammeta::icystreammeta::IcyClientProxy::bindProxy, ::de::appwerft::icystreammeta::icystreammeta::IcyClientProxy::dispose
+de.appwerft.icymetaclient.IcyMetaClientProxy, ::de::appwerft::icymetaclient::icymetaclient::IcyMetaClientProxy::bindProxy, ::de::appwerft::icymetaclient::icymetaclient::IcyMetaClientProxy::dispose
+de.appwerft.icymetaclient.IcymetaclientModule, ::de::appwerft::icymetaclient::IcymetaclientModule::bindProxy, ::de::appwerft::icymetaclient::IcymetaclientModule::dispose
 %%

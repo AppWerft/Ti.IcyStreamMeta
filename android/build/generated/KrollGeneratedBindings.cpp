@@ -1,23 +1,23 @@
 /* C++ code produced by gperf version 3.0.3 */
-/* Command-line: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/gperf -L C++ -E -t /private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/icystreammeta-generated/KrollGeneratedBindings.gperf  */
+/* Command-line: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/gperf -L C++ -E -t /private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/Icymetaclient-generated/KrollGeneratedBindings.gperf  */
 /* Computed positions: -k'' */
 
-#line 3 "/private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/icystreammeta-generated/KrollGeneratedBindings.gperf"
+#line 3 "/private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/Icymetaclient-generated/KrollGeneratedBindings.gperf"
 
 
 #include <string.h>
 #include <v8.h>
 #include <KrollBindings.h>
 
-#include "de.appwerft.icystreammeta.IcyMetaProxy.h"
-#include "de.appwerft.icystreammeta.IcyMetaModule.h"
+#include "de.appwerft.icymetaclient.IcyMetaClientProxy.h"
+#include "de.appwerft.icymetaclient.IcymetaclientModule.h"
 
 
-#line 14 "/private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/icystreammeta-generated/KrollGeneratedBindings.gperf"
+#line 14 "/private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/Icymetaclient-generated/KrollGeneratedBindings.gperf"
 struct titanium::bindings::BindEntry;
 /* maximum key range = 2, duplicates = 0 */
 
-class IcystreammetaBindings
+class IcymetaclientBindings
 {
 private:
   static inline unsigned int hash (const char *str, unsigned int len);
@@ -27,21 +27,21 @@ public:
 
 inline /*ARGSUSED*/
 unsigned int
-IcystreammetaBindings::hash (register const char *str, register unsigned int len)
+IcymetaclientBindings::hash (register const char *str, register unsigned int len)
 {
   return len;
 }
 
 struct titanium::bindings::BindEntry *
-IcystreammetaBindings::lookupGeneratedInit (register const char *str, register unsigned int len)
+IcymetaclientBindings::lookupGeneratedInit (register const char *str, register unsigned int len)
 {
   enum
     {
       TOTAL_KEYWORDS = 2,
-      MIN_WORD_LENGTH = 38,
-      MAX_WORD_LENGTH = 39,
-      MIN_HASH_VALUE = 38,
-      MAX_HASH_VALUE = 39
+      MIN_WORD_LENGTH = 44,
+      MAX_WORD_LENGTH = 45,
+      MIN_HASH_VALUE = 44,
+      MAX_HASH_VALUE = 45
     };
 
   static struct titanium::bindings::BindEntry wordlist[] =
@@ -50,11 +50,11 @@ IcystreammetaBindings::lookupGeneratedInit (register const char *str, register u
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
       {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
-      {""}, {""},
-#line 16 "/private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/icystreammeta-generated/KrollGeneratedBindings.gperf"
-      {"de.appwerft.icystreammeta.IcyMetaProxy", ::de::appwerft::icystreammeta::icystreammeta::IcyMetaProxy::bindProxy, ::de::appwerft::icystreammeta::icystreammeta::IcyMetaProxy::dispose},
-#line 17 "/private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/icystreammeta-generated/KrollGeneratedBindings.gperf"
-      {"de.appwerft.icystreammeta.IcyMetaModule", ::de::appwerft::icystreammeta::IcyMetaModule::bindProxy, ::de::appwerft::icystreammeta::IcyMetaModule::dispose}
+      {""}, {""}, {""}, {""}, {""}, {""}, {""}, {""},
+#line 16 "/private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/Icymetaclient-generated/KrollGeneratedBindings.gperf"
+      {"de.appwerft.icymetaclient.IcyMetaClientProxy", ::de::appwerft::icymetaclient::icymetaclient::IcyMetaClientProxy::bindProxy, ::de::appwerft::icymetaclient::icymetaclient::IcyMetaClientProxy::dispose},
+#line 17 "/private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/Icymetaclient-generated/KrollGeneratedBindings.gperf"
+      {"de.appwerft.icymetaclient.IcymetaclientModule", ::de::appwerft::icymetaclient::IcymetaclientModule::bindProxy, ::de::appwerft::icymetaclient::IcymetaclientModule::dispose}
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
@@ -71,5 +71,5 @@ IcystreammetaBindings::lookupGeneratedInit (register const char *str, register u
     }
   return 0;
 }
-#line 18 "/private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/icystreammeta-generated/KrollGeneratedBindings.gperf"
+#line 18 "/private/var/folders/25/yvdn9h053sv3htdkzq8558k40000gn/T/fuerst/Icymetaclient-generated/KrollGeneratedBindings.gperf"
 

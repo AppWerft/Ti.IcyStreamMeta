@@ -1,6 +1,6 @@
-<project name="icystreammeta" default="dist">
+<project name="Icymetaclient" default="dist">
 	<description>
-		Ant build script for Titanium Android module icystreammeta
+		Ant build script for Titanium Android module ICY clients
 	</description>
 
 	<property name="ti.module.root" location="${basedir}"/>

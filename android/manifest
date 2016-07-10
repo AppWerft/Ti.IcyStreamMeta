@@ -2,17 +2,17 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 1.0.0
+version: 1.2.0
 apiversion: 2
 architectures: armeabi armeabi-v7a x86
-description: icystreammeta
+description: Client for meta data of icy Server
 author: Rainer Schleevoigt
-license: Specify your license
+license: my license
 copyright: Copyright (c) 2016 by 
 
 # these should not be edited
-name: icystreammeta
-moduleid: de.appwerft.icystreammeta
-guid: 4d74be83-9041-4fce-ab25-7ad71fc8b2b4
+name: Icymetaclient
+moduleid: de.appwerft.icymetaclient
+guid: 4d74be83-9041-4fce-ab25-7ad71fc8b2b5
 platform: android
 minsdk: 5.2.0.GA

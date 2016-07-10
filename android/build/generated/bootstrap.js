@@ -16,40 +16,29 @@ function moduleBootstrap(moduleBinding) {
 			name, namespace, moduleBinding.getBinding);
 	}
 
-	var module = moduleBinding.getBinding("de.appwerft.icystreammeta.IcyMetaModule")["Icystreammeta"];
+	var module = moduleBinding.getBinding("de.appwerft.icymetaclient.IcymetaclientModule")["icymetaclient"];
 	var invocationAPIs = module.invocationAPIs = [];
-	module.apiName = "Icystreammeta";
+	module.apiName = "icymetaclient";
 
 	function addInvocationAPI(module, moduleNamespace, namespace, api) {
 		invocationAPIs.push({ namespace: namespace, api: api });
 	}
 
-		addInvocationAPI(module, "Icystreammeta", "Icystreammeta", "createIcyMeta");
-	addInvocationAPI(module, "Icystreammeta", "Icystreammeta", "createIcyClient");
+		addInvocationAPI(module, "icymetaclient", "icymetaclient", "createIcyMetaClient");
 
 			if (!("__propertiesDefined__" in module)) {		
 		Object.defineProperties(module, {
-			"IcyMeta": {
+			"IcyMetaClient": {
 				get: function() {
-					var IcyMeta = lazyGet(this, "de.appwerft.icystreammeta.IcyMetaProxy", "IcyMeta", "IcyMeta");
-					return IcyMeta;
-				},
-				configurable: true
-			},
-			"IcyClient": {
-				get: function() {
-					var IcyClient = lazyGet(this, "de.appwerft.icystreammeta.IcyClientProxy", "IcyClient", "IcyClient");
-					return IcyClient;
+					var IcyMetaClient = lazyGet(this, "de.appwerft.icymetaclient.IcyMetaClientProxy", "IcyMetaClient", "IcyMetaClient");
+					return IcyMetaClient;
 				},
 				configurable: true
 			},
 		
 		});
-		module.constructor.prototype.createIcyMeta = function() {
-			return new module.IcyMeta(arguments);
-		}
-		module.constructor.prototype.createIcyClient = function() {
-			return new module.IcyClient(arguments);
+		module.constructor.prototype.createIcyMetaClient = function() {
+			return new module.IcyMetaClient(arguments);
 		}
 		}
 		module.__propertiesDefined__ = true;
