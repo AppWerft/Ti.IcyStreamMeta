@@ -16,15 +16,15 @@ function moduleBootstrap(moduleBinding) {
 			name, namespace, moduleBinding.getBinding);
 	}
 
-	var module = moduleBinding.getBinding("de.appwerft.icymetaclient.IcymetaclientModule")["icymetaclient"];
+	var module = moduleBinding.getBinding("de.appwerft.icymetaclient.IcymetaclientModule")["Icymetaclient"];
 	var invocationAPIs = module.invocationAPIs = [];
-	module.apiName = "icymetaclient";
+	module.apiName = "Icymetaclient";
 
 	function addInvocationAPI(module, moduleNamespace, namespace, api) {
 		invocationAPIs.push({ namespace: namespace, api: api });
 	}
 
-		addInvocationAPI(module, "icymetaclient", "icymetaclient", "createIcyMetaClient");
+		addInvocationAPI(module, "Icymetaclient", "Icymetaclient", "createIcyMetaClient");
 
 			if (!("__propertiesDefined__" in module)) {		
 		Object.defineProperties(module, {
