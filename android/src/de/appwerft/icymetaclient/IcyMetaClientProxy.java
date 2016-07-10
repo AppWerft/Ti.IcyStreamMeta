@@ -2,8 +2,11 @@ package de.appwerft.icymetaclient;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -16,6 +19,7 @@ import org.appcelerator.kroll.KrollProxy;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiC;
+import org.apache.commons.io.IOUtils;
 
 import android.os.AsyncTask;
 
@@ -230,16 +234,24 @@ public class IcyMetaClientProxy extends KrollProxy {
 		}
 
 		private String Stream2String(InputStream stream, int metaDataOffset) {
+			// http://www.smackfu.com/stuff/programming/shoutcast.html
+			final int BLOCKSIZE = 16;
+			/*
+			 * StringWriter writer = new StringWriter(); try {
+			 * IOUtils.copy(stream, writer, "UTF-8"); } catch (IOException e) {
+			 * e.printStackTrace(); }
+			 */
 			int b;
 			int count = 0;
-			int metaDataLength = 4080; // 4080 is the max length
+			int metaDataLength = BLOCKSIZE * 255; // 4080 is the max length (16
+													// x 255)
 			boolean inData = false;
-			StringBuilder metaData = new StringBuilder();
+			StringWriter writer = new StringWriter();
 			try {
 				while ((b = stream.read()) != -1) {
 					count++;
 					if (count == metaDataOffset + 1) {
-						metaDataLength = b * 16;
+						metaDataLength = b * BLOCKSIZE;
 					}
 					if (count > metaDataOffset + 1
 							&& count < (metaDataOffset + metaDataLength)) {
@@ -249,7 +261,7 @@ public class IcyMetaClientProxy extends KrollProxy {
 					}
 					if (inData) {
 						if (b != 0) {
-							metaData.append((char) b);
+							writer.append((char) b);
 						}
 					}
 					if (count > (metaDataOffset + metaDataLength)) {
@@ -259,7 +271,7 @@ public class IcyMetaClientProxy extends KrollProxy {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			return metaData.toString();
+			return writer.toString();
 
 		}
 
