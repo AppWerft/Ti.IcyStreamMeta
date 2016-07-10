@@ -56,7 +56,10 @@ public class IcyMetaClientProxy extends KrollProxy {
 			interval = options.getInt("interval");
 		}
 		if (options.containsKey("autoStart")) {
-			autoStart = options.getBoolean("autoStart");
+			this.autoStart = options.getBoolean("autoStart");
+			Log.d(LCAT, "autoStart=" + this.autoStart);
+			if (this.autoStart)
+				metaClient.startTimer();
 		}
 		if (options.containsKey(TiC.PROPERTY_ONLOAD)) {
 			Object cb = options.get(TiC.PROPERTY_ONLOAD);
@@ -226,6 +229,40 @@ public class IcyMetaClientProxy extends KrollProxy {
 
 		}
 
+		private String Stream2String(InputStream stream, int metaDataOffset) {
+			int b;
+			int count = 0;
+			int metaDataLength = 4080; // 4080 is the max length
+			boolean inData = false;
+			StringBuilder metaData = new StringBuilder();
+			try {
+				while ((b = stream.read()) != -1) {
+					count++;
+					if (count == metaDataOffset + 1) {
+						metaDataLength = b * 16;
+					}
+					if (count > metaDataOffset + 1
+							&& count < (metaDataOffset + metaDataLength)) {
+						inData = true;
+					} else {
+						inData = false;
+					}
+					if (inData) {
+						if (b != 0) {
+							metaData.append((char) b);
+						}
+					}
+					if (count > (metaDataOffset + metaDataLength)) {
+						break;
+					}
+				}
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			return metaData.toString();
+
+		}
+
 		private void retreiveMetadata() {
 
 			AsyncTask<Void, Void, Void> doRequest = new AsyncTask<Void, Void, Void>() {
@@ -259,42 +296,14 @@ public class IcyMetaClientProxy extends KrollProxy {
 						isError = true;
 
 					}
-					int b;
-					int count = 0;
-					int metaDataLength = 4080; // 4080 is the max length
-					boolean inData = false;
-					StringBuilder metaData = new StringBuilder();
-					try {
-						while ((b = stream.read()) != -1) {
-							count++;
-							if (count == metaDataOffset + 1) {
-								metaDataLength = b * 16;
-							}
-							if (count > metaDataOffset + 1
-									&& count < (metaDataOffset + metaDataLength)) {
-								inData = true;
-							} else {
-								inData = false;
-							}
-							if (inData) {
-								if (b != 0) {
-									metaData.append((char) b);
-								}
-							}
-							if (count > (metaDataOffset + metaDataLength)) {
-								break;
-							}
-						}
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
+					String[] metaParts = Stream2String(stream, metaDataOffset)
+							.split(";");
 					try {
 						stream.close();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 					KrollDict resultDict = new KrollDict();
-					String[] metaParts = metaData.toString().split(";");
 					for (int i = 0; i < metaParts.length; i++) {
 						String line = metaParts[i];
 						String[] keyval = line.split("=");
