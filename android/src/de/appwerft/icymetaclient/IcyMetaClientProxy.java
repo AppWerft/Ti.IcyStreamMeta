@@ -146,6 +146,7 @@ public class IcyMetaClientProxy extends KrollProxy {
 		private boolean isError;
 		private boolean isRunning;
 		private Timer timer;
+		private int oldHash = 0;
 
 		public IcyStreamMeta() {
 			// setStreamUrl(streamUrl);
@@ -287,8 +288,6 @@ public class IcyMetaClientProxy extends KrollProxy {
 			}
 			String result = new String(bb.array(), Charset.forName(charset));
 			int stringLength = result.lastIndexOf(";");
-			Log.d(LCAT, "String length = " + stringLength + "        "
-					+ metaDataLength);
 			bb.clear();
 			if (stringLength != -1)
 				return result.substring(0, stringLength);
@@ -359,10 +358,13 @@ public class IcyMetaClientProxy extends KrollProxy {
 						} catch (IndexOutOfBoundsException ex) {
 						}
 					}
-					if (loadCallback != null)
-						loadCallback.call(getKrollObject(), resultDict);
-					else
-						Log.e(LCAT, "loadCallback is null");
+					if (resultDict.hashCode() != oldHash) {
+						if (loadCallback != null)
+							loadCallback.call(getKrollObject(), resultDict);
+						else
+							Log.e(LCAT, "loadCallback is null");
+						oldHash = resultDict.hashCode();
+					}
 					return null;
 				} // do in background
 			};// async task
