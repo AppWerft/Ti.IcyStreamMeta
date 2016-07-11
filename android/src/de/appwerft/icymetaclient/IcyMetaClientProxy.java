@@ -32,6 +32,7 @@ public class IcyMetaClientProxy extends KrollProxy {
 	private URL url = null;
 	private int interval = 0; // sec
 	private boolean autoStart = false;
+	private String charset = "UTF-8";
 
 	IcyStreamMeta metaClient = null;
 	KrollFunction loadCallback = null;
@@ -59,6 +60,9 @@ public class IcyMetaClientProxy extends KrollProxy {
 		}
 		if (options.containsKey("interval")) {
 			interval = options.getInt("interval");
+		}
+		if (options.containsKey("charset")) {
+			charset = options.getString("charset");
 		}
 		if (options.containsKey("autoStart")) {
 			this.autoStart = options.getBoolean("autoStart");
@@ -281,10 +285,11 @@ public class IcyMetaClientProxy extends KrollProxy {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			String result = new String(bb.array(), Charset.forName("UTF-8"));
+			String result = new String(bb.array(), Charset.forName(charset));
 			int stringLength = result.lastIndexOf(";");
 			Log.d(LCAT, "String length = " + stringLength + "        "
 					+ metaDataLength);
+			bb.clear();
 			if (stringLength != -1)
 				return result.substring(0, stringLength);
 			else
