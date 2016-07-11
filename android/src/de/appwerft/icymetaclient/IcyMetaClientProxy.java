@@ -161,7 +161,7 @@ public class IcyMetaClientProxy extends KrollProxy {
 					public void run() {
 						retreiveMetadata();
 					}
-				}, 0, interval);
+				}, 0, interval * 1000);
 				isRunning = true;
 			}
 		}
