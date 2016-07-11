@@ -260,7 +260,6 @@ public class IcyMetaClientProxy extends KrollProxy {
 				bb.put(i, (byte) 0x0);
 			}
 			boolean inData = false;
-			StringWriter writer = new StringWriter();
 			try {
 				while ((b = stream.read()) != EOSTREAM) {
 					count++;
@@ -275,9 +274,6 @@ public class IcyMetaClientProxy extends KrollProxy {
 					}
 					if (inData) {
 						bb.put((byte) b);
-						if (b != 0) {
-							writer.append((char) b);
-						}
 					}
 					if (count > (metaDataOffset + metaDataLength)) {
 						break;
@@ -292,9 +288,7 @@ public class IcyMetaClientProxy extends KrollProxy {
 			if (stringLength != -1)
 				return result.substring(0, stringLength);
 			else
-				return ";";
-			// return writer.toString();
-
+				return null;
 		}
 
 		private void retreiveMetadata() {
@@ -332,8 +326,10 @@ public class IcyMetaClientProxy extends KrollProxy {
 						isError = true;
 
 					}
-					String[] metaParts = Stream2String(stream, metaDataOffset)
-							.split(";");
+					String metaString = Stream2String(stream, metaDataOffset);
+					if (metaString == null)
+						return null;
+					String[] metaParts = metaString.split(";");
 					try {
 						stream.close();
 					} catch (IOException e) {
@@ -343,19 +339,21 @@ public class IcyMetaClientProxy extends KrollProxy {
 					for (int i = 0; i < metaParts.length; i++) {
 						String line = metaParts[i];
 						String[] keyval = line.split("=");
-						String key = keyval[0];
-						String val = keyval[1];
-						String sanitizedValue = "";
-						try {
-							sanitizedValue = val.substring(1, val.length() - 1)
-									.replaceAll("\r", "");
-							resultDict.put(key, sanitizedValue);
-						} catch (PatternSyntaxException ex) {
-							Log.d(LCAT,
-									"PatternSyntaxException"
-											+ ex.getDescription());
-						} catch (IllegalArgumentException ex) {
-						} catch (IndexOutOfBoundsException ex) {
+						if (keyval != null) {
+							String key = keyval[0];
+							String val = keyval[1];
+							String sanitizedValue = "";
+							try {
+								sanitizedValue = val.substring(1,
+										val.length() - 1).replaceAll("\r", "");
+								resultDict.put(key, sanitizedValue);
+							} catch (PatternSyntaxException ex) {
+								Log.d(LCAT,
+										"PatternSyntaxException"
+												+ ex.getDescription());
+							} catch (IllegalArgumentException ex) {
+							} catch (IndexOutOfBoundsException ex) {
+							}
 						}
 					}
 					if (resultDict.hashCode() != oldHash) {
