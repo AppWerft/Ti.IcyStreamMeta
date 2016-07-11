@@ -22,6 +22,7 @@ import org.appcelerator.titanium.TiC;
 import org.apache.commons.io.IOUtils;
 
 import android.os.AsyncTask;
+import java.nio.ByteBuffer;
 
 // This proxy can be created by calling Icystreammeta.createExample({message: "hello world"})
 @Kroll.proxy(creatableInModule = IcymetaclientModule.class)
@@ -29,8 +30,8 @@ public class IcyMetaClientProxy extends KrollProxy {
 	// Standard Debugging variables
 	private static final String LCAT = "ICYMETA=============";
 	private URL url = null;
-	private int interval = 10; // sec
-	private boolean autoStart = true;
+	private int interval = 0; // sec
+	private boolean autoStart = false;
 
 	IcyStreamMeta metaClient = null;
 	KrollFunction loadCallback = null;
@@ -149,13 +150,16 @@ public class IcyMetaClientProxy extends KrollProxy {
 		}
 
 		public void startTimer() {
-			timer.scheduleAtFixedRate(new TimerTask() {
-				@Override
-				public void run() {
-					retreiveMetadata();
-				}
-			}, 0, interval);
-			isRunning = true;
+			retreiveMetadata();
+			if (interval != 0) {
+				timer.scheduleAtFixedRate(new TimerTask() {
+					@Override
+					public void run() {
+						retreiveMetadata();
+					}
+				}, 0, interval);
+				isRunning = true;
+			}
 		}
 
 		public void stopTimer() {
@@ -236,19 +240,24 @@ public class IcyMetaClientProxy extends KrollProxy {
 		private String Stream2String(InputStream stream, int metaDataOffset) {
 			// http://www.smackfu.com/stuff/programming/shoutcast.html
 			final int BLOCKSIZE = 16;
+			final int EOSTREAM = -1;
 			/*
 			 * StringWriter writer = new StringWriter(); try {
 			 * IOUtils.copy(stream, writer, "UTF-8"); } catch (IOException e) {
 			 * e.printStackTrace(); }
 			 */
-			int b;
+
+			int b; // 0...255
 			int count = 0;
 			int metaDataLength = BLOCKSIZE * 255; // 4080 is the max length (16
-													// x 255)
+			ByteBuffer bb = ByteBuffer.allocate(metaDataLength);
+			for (int i = 0; i < metaDataLength; i++) {
+				bb.put(i, (byte) 0x0);
+			}
 			boolean inData = false;
 			StringWriter writer = new StringWriter();
 			try {
-				while ((b = stream.read()) != -1) {
+				while ((b = stream.read()) != EOSTREAM) {
 					count++;
 					if (count == metaDataOffset + 1) {
 						metaDataLength = b * BLOCKSIZE;
@@ -260,6 +269,7 @@ public class IcyMetaClientProxy extends KrollProxy {
 						inData = false;
 					}
 					if (inData) {
+						bb.put((byte) b);
 						if (b != 0) {
 							writer.append((char) b);
 						}
@@ -271,19 +281,28 @@ public class IcyMetaClientProxy extends KrollProxy {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			return writer.toString();
+			String result = new String(bb.array(), Charset.forName("UTF-8"));
+			int stringLength = result.lastIndexOf(";");
+			Log.d(LCAT, "String length = " + stringLength + "        "
+					+ metaDataLength);
+			if (stringLength != -1)
+				return result.substring(0, stringLength);
+			else
+				return ";";
+			// return writer.toString();
 
 		}
 
 		private void retreiveMetadata() {
-
 			AsyncTask<Void, Void, Void> doRequest = new AsyncTask<Void, Void, Void>() {
 				protected Void doInBackground(Void[] dummy) {
+					// http://www.javased.com/?api=java.net.URLConnection
 					URLConnection con = null;
 					try {
 						con = streamUrl.openConnection();
 					} catch (IOException e) {
 						sendError(e.getMessage());
+						return null;
 					}
 					con.setRequestProperty("Icy-MetaData", "1");
 					con.setRequestProperty("Connection", "close");
@@ -291,6 +310,7 @@ public class IcyMetaClientProxy extends KrollProxy {
 						con.connect();
 					} catch (IOException e) {
 						sendError(e.getMessage());
+						return null;
 					}
 					int metaDataOffset = 0;
 					Map<String, List<String>> headers = con.getHeaderFields();
