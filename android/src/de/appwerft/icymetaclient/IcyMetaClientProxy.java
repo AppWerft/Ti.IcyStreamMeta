@@ -1,13 +1,9 @@
 package de.appwerft.icymetaclient;
 
 import java.io.IOException;
-
-import org.mozilla.universalchardet.UniversalDetector;
-
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-//import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +17,7 @@ import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiC;
 import org.appcelerator.titanium.TiContext.OnLifecycleEvent;
+import org.appcelerator.titanium.TiBaseActivity;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -44,6 +41,13 @@ public class IcyMetaClientProxy extends KrollProxy implements OnLifecycleEvent {
 	public IcyMetaClientProxy() {
 		super();
 		metaClient = new IcyStreamMeta();
+	}
+
+	@Override
+	public void initActivity(Activity activity) {
+		super.initActivity(activity);
+		((TiBaseActivity) getActivity()).addOnLifecycleEventListener(this);
+
 	}
 
 	// Handle creation options
@@ -104,7 +108,6 @@ public class IcyMetaClientProxy extends KrollProxy implements OnLifecycleEvent {
 
 	@Kroll.method
 	public void start() {
-
 		metaClient.startTimer();
 	}
 
@@ -286,19 +289,12 @@ public class IcyMetaClientProxy extends KrollProxy implements OnLifecycleEvent {
 			final int EOSTREAM = -1;
 			if (stream == null)
 				return null;
-
-			/*
-			 * StringWriter writer = new StringWriter(); try {
-			 * IOUtils.copy(stream, writer, "UTF-8"); } catch (IOException e) {
-			 * e.printStackTrace(); }
-			 */
-
 			int b; // 0...255
 			int count = 0;
 			int metaDataLength = BLOCKSIZE * 255; // 4080 is the max length (16
 
 			// https://github.com/thkoch2001/juniversalchardet/blob/master/example/TestDetector.java
-			byte[] bytes = new byte[metaDataLength + 1];
+			byte[] bytesOfMetaData = new byte[metaDataLength + 1];
 			boolean inData = false;
 			try {
 				int bytecount = 0;
@@ -315,7 +311,7 @@ public class IcyMetaClientProxy extends KrollProxy implements OnLifecycleEvent {
 						inData = false;
 					}
 					if (inData) {
-						bytes[bytecount++] = (byte) b;
+						bytesOfMetaData[bytecount++] = (byte) b;
 					}
 					if (count > (metaDataOffset + metaDataLength)) {
 						break;
@@ -324,15 +320,10 @@ public class IcyMetaClientProxy extends KrollProxy implements OnLifecycleEvent {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+			String detectedCharset = guessEncoding(bytesOfMetaData);
+			String result = new String(bytesOfMetaData,
+					Charset.forName(charset));
 
-			/*
-			 * UniversalDetector detector = new UniversalDetector(null);
-			 * detector.handleData(bb.array(), 0, metaDataLength); String
-			 * detectedCharset = detector.getDetectedCharset();
-			 * detector.reset();
-			 */
-
-			String result = new String(bytes, Charset.forName(charset));
 			int stringLength = result.lastIndexOf(";");
 			try {
 				stream.close();
@@ -345,8 +336,22 @@ public class IcyMetaClientProxy extends KrollProxy implements OnLifecycleEvent {
 				return null;
 		}
 
+		public String guessEncoding(byte[] bytes) {
+			String DEFAULT_ENCODING = "UTF-8";
+			org.mozilla.universalchardet.UniversalDetector detector = new org.mozilla.universalchardet.UniversalDetector(
+					null);
+			detector.handleData(bytes, 0, bytes.length);
+			detector.dataEnd();
+			String encoding = detector.getDetectedCharset();
+			detector.reset();
+			if (encoding == null) {
+				encoding = DEFAULT_ENCODING;
+			}
+			return encoding;
+		}
+
 		private void retreiveMetadata() {
-			Log.d(LCAT, "isForeGround=" + isForeGround);
+			// Log.d(LCAT, "isForeGround=" + isForeGround);
 			AsyncTask<Void, Void, Void> doRequest = new AsyncTask<Void, Void, Void>() {
 				protected Void doInBackground(Void[] dummy) {
 					// http://www.javased.com/?api=java.net.URLConnection
@@ -369,8 +374,7 @@ public class IcyMetaClientProxy extends KrollProxy implements OnLifecycleEvent {
 					int metaDataOffset = 0;
 					Map<String, List<String>> headers = con.getHeaderFields();
 					if (headers.containsKey("icy-name")) {
-						resultDict.put("icy-name",
-								headers.get("icy-name").get(0));
+						resultDict.put("name", headers.get("icy-name").get(0));
 					}
 					InputStream stream = null;
 					try {
@@ -384,31 +388,35 @@ public class IcyMetaClientProxy extends KrollProxy implements OnLifecycleEvent {
 								"icy-metaint").get(0));
 					}
 
-					if (metaDataOffset == 0) {
+					if (metaDataOffset == 0 || stream == null) {
 						isError = true;
+						Log.e(LCAT, "metaDataOffset=0");
+						return null;
 					}
 
 					String metaString = Stream2String(stream, metaDataOffset);
-
+					Log.d(LCAT, metaString);
 					if (metaString == null) {
 						return null;
 					}
-					String[] metaParts = metaString.split(";");
+					String[] metaParts = metaString.split("\';");
 					for (int i = 0; i < metaParts.length; i++) {
 						String line = metaParts[i];
-
+						Log.d(LCAT + "line=", line);
 						String[] keyval = line.split("=");
 						if (keyval != null && keyval.length == 2) {
-							String key = keyval[0];
 							String val = keyval[1];
-							String sanitizedValue = "";
-							sanitizedValue = val.substring(1, val.length() - 1);
-							resultDict.put(key, sanitizedValue);
-
+							Log.d(LCAT, "linelength=" + val.length());
+							if (val.length() > 1) {
+								String sanitizedValue = "";
+								sanitizedValue = val.substring(1,
+										val.length() - 1);
+								resultDict.put(keyval[0].toLowerCase()
+										.replaceAll("stream", ""),
+										sanitizedValue);
+							}
 						} else {
 							Log.e(LCAT, "cannot split meta with =");
-							Log.e(LCAT, line);
-
 						}
 					}
 					Log.d(LCAT, resultDict.toString());
